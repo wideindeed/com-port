@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Elegant Cascading Interface</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --dark-bg: #1a1a1a;
+      --accent: #6366f1;
+      --text-light: #f5f5f5;
+      --text-muted: #999;
+      --primary-font: 'Playfair Display', serif;
+      --secondary-font: 'Inter', sans-serif;
+      --tab-1: #2d2f36;
+      --tab-2: #3b3d45;
+      --tab-3: #4b4d56;
+    }
+
+        /* Disable scrolling */
+    body, html {
+    overflow: hidden;
+    }
+
+
+    body {
+      margin: 0;
+      background-color: var(--dark-bg);
+      color: var(--text-light);
+      font-family: var(--secondary-font);
+      overflow-x: hidden;
+    }
+
+    .stack {
+      position: relative;
+      width: 100%;
+      height: 120px;
+      z-index: 10;
+    }
+
+    .tab {
+      position: absolute;
+      width: 100%;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--primary-font);
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease, background-color 0.3s, box-shadow 0.3s ease;
+      overflow: hidden;
+    }
+
+    .tab:hover {
+      transform: translateY(-5px);
+    }
+
+    .tab:nth-child(1), .tab:nth-child(2), .tab:nth-child(3) {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    .tab:nth-child(1) {
+      top: 0;
+      background-color: var(--tab-1);
+      z-index: 3;  
+    }
+
+    .tab:nth-child(2) {
+      top: 40px;
+      background-color: var(--tab-2);
+      z-index: 2;
+    }
+
+    .tab:nth-child(3) {
+      top: 80px;
+      background-color: var(--tab-3);
+      z-index: 1;
+    }
+
+    .tab::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 10%;
+      height: 3px;
+      background: var(--accent);
+      opacity: 0.7;
+      border-radius: 2px;
+      transform: translateX(-50%);
+      animation: pulseBar 2.5s infinite ease-in-out;
+      background-color: #978d8d;
+    }
+
+    @keyframes pulseBar {
+      0%, 100% { transform: translateX(-50%) scaleX(1); opacity: 0.5; }
+      50% { transform: translateX(-50%) scaleX(1.2); opacity: 1; }
+    }
+    .projector-screen {
+    visibility: hidden;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    transition:
+        height 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        opacity 0.4s ease 0.2s,
+        visibility 0s linear 0.8s; /* hides AFTER the slide is done */
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    background-color: #121212;
+    z-index: 50;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .projector-screen.active {
+    visibility: visible;
+    opacity: 1;
+    height: calc(100vh - 60px);
+    transition:
+        height 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        opacity 0.4s ease,
+        visibility 0s linear 0s; /* instantly visible */
+    }
+
+
+
+    .screen-content {
+      padding: 80px 60px;
+      height: calc(100vh - 220px);
+      gap: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-light);
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.6s ease 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .projector-screen.active .screen-content {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .left-panel {
+      flex: 1;
+      opacity: 0;
+      transform: translateX(-60px);
+      position: relative;
+      z-index: 2;
+    }
+
+    .projector-screen.active .left-panel {
+      animation: slideLeft 0.8s ease 0.5s forwards;
+    }
+
+    @keyframes slideLeft {
+      from { opacity: 0; transform: translateX(-60px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .left-panel h1 {
+      font-family: var(--primary-font);
+      font-size: 4.5rem;
+      margin: 0 0 30px;
+      line-height: 1.1;
+      background: linear-gradient(to right, rgb(212, 212, 212) , rgb(228, 228, 221));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .left-panel p {
+      max-width: 500px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      font-size: 1.1rem;
+    }
+
+    .right-panel {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateX(60px);
+    }
+
+    .projector-screen.active .right-panel {
+      animation: slideRight 0.8s ease 0.5s forwards;
+    }
+
+    @keyframes slideRight {
+      from { opacity: 0; transform: translateX(60px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Background Image Styling */
+    .left-bg {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 50%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0;
+      transform: translateX(-100%);
+      transition: opacity 0.8s ease 0.4s, transform 0.8s ease 0.4s;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .projector-screen.active .left-bg {
+      opacity: 0.15;
+      transform: translateX(0);
+    }
+
+    /* Specific background images for each tab */
+    .screen-content[data-tab="bim"] .left-bg {
+      background-image: url('https://images.unsplash.com/photo-1569317252961-e8e879ffe423?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDd8fEFyY2hpdGVjdHxlbnwwfHwwfHx8MA%3D%3D');
+    }
+
+    .screen-content[data-tab="autocad"] .left-bg {
+      background-image: url('https://images.unsplash.com/photo-1557165100-52fd67c160d6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8ODR8fEFyY2hpdGVjdHxlbnwwfHwwfHx8MA%3D%3D');
+    }
+
+    .screen-content[data-tab="adobe"] .left-bg {
+      background-image: url('https://images.unsplash.com/photo-1736536475506-247d7250d8aa?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTA0fHxBcmNoaXRlY3R8ZW58MHx8MHx8fDA%3D');
+    }
+
+    .carousel {
+      position: relative;
+      width: 100%;
+      max-width: 700px;
+      margin-left: 60px;
+    }
+
+    .carousel img {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+
+    .carousel img:hover {
+      transform: scale(1.03);
+    }
+
+    .image-caption {
+      text-align: center;
+      margin-top: 30px;
+      padding: 0 20px;
+    }
+
+    .image-caption h3 {
+      font-family: var(--primary-font);
+      font-size: 1.8rem;
+      color: var(--text-light);
+      margin: 0 0 12px 0;
+      font-weight: 600;
+    }
+
+    .image-caption p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.5;
+      margin: 0;
+      max-width: none;
+    }
+
+    .arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 2rem;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.4);
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      z-index: 2;
+      border-radius: 50%;
+      transition: background 0.3s ease;
+    }
+
+    .arrow:hover {
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .arrow.left { left: -50px; }
+    .arrow.right { right: -50px; }
+
+    /* Close button */
+    .close-screen {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      background: none;
+      border: none;
+      color: var(--text-light);
+      font-size: 2rem;
+      cursor: pointer;
+      z-index: 60;
+      opacity: 0;
+      transition: opacity 0.3s ease 0.8s;
+      padding: 10px;
+      border-radius: 50%;
+    }
+
+    .projector-screen.active .close-screen {
+      opacity: 1;
+    }
+
+    .close-screen:hover {
+      color: var(--accent);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Enhanced default content area */
+    .default-content {
+      padding: 150px 60px;
+      text-align: center;
+      background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%);
+      min-height: calc(100vh - 300px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .default-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(40, 40, 40, 0.3) 0%, transparent 50%);
+      z-index: 1;
+    }
+
+    .default-content > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    .default-content.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .default-content h1 {
+      font-family: var(--primary-font);
+      font-size: 5rem;
+      margin: 0 0 40px;
+      color: #e5e5e5;
+      font-weight: 700;
+    }
+
+    .default-content .subtitle {
+      font-size: 1.8rem;
+      color: #b5b5b5;
+      margin-bottom: 40px;
+      font-weight: 300;
+      letter-spacing: 1px;
+    }
+
+    .default-content p {
+      font-size: 1.3rem;
+      color: #888;
+      max-width: 800px;
+      line-height: 1.8;
+      margin: 0 0 50px;
+    }
+
+    .default-content .cta-text {
+      font-size: 1.1rem;
+      color: #d5d5d5;
+      font-weight: 500;
+      margin-top: 30px;
+      padding: 15px 30px;
+      border: 2px solid #404040;
+      border-radius: 50px;
+      background: rgba(40, 40, 40, 0.6);
+      backdrop-filter: blur(10px);
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+
+    .default-content .cta-text:hover {
+      background: rgba(60, 60, 60, 0.8);
+      border-color: #606060;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Modal Styles */
+    .image-modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(15, 15, 15, 0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      flex-direction: column;
+      padding: 40px;
+      box-sizing: border-box;
+    }
+
+    .image-modal.active {
+      display: flex;
+    }
+
+    .image-modal img {
+      max-width: 90%;
+      max-height: 80vh;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+
+    .image-modal .modal-arrow {
+      font-size: 3rem;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: white;
+      background: rgba(0,0,0,0.5);
+      border: none;
+      cursor: pointer;
+      padding: 15px;
+      z-index: 1001;
+      border-radius: 50%;
+      transition: background 0.3s ease;
+    }
+
+    .image-modal .modal-arrow:hover {
+      background: rgba(0,0,0,0.7);
+    }
+
+    .image-modal .modal-arrow.left { left: 40px; }
+    .image-modal .modal-arrow.right { right: 40px; }
+
+    .image-modal .close-btn {
+      position: absolute;
+      top: 30px;
+      right: 40px;
+      font-size: 2rem;
+      color: white;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 50%;
+    }
+
+    .image-modal .close-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Reset animations when switching tabs */
+    .reset-animations .left-panel,
+    .reset-animations .right-panel {
+      animation: none !important;
+      opacity: 0;
+      transform: translateX(-60px);
+    }
+
+    .reset-animations .right-panel {
+      transform: translateX(60px);
+    }
+
+    @media (max-width: 768px) {
+
+         body, html {
+    overflow-x: hidden;
+    overflow-y: auto; /* ✅ Allow scrolling vertically */
+    height: auto;      /* ✅ Important for default-content to show fully */
+  }
+
+      .stack {
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        position: static;
+      }
+
+      .tab {
+        position: static !important;
+        width: 100%;
+        height: 50px;
+        font-size: 1.1rem;
+        z-index: auto !important;
+        box-shadow: none;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+
+       .projector-screen {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 50;
+  background-color: #121212;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  transition:
+    height 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 0.4s ease 0.2s,
+    visibility 0s linear 0.8s;
+}
+
+.projector-screen.active {
+  height: calc(100vh - 60px);
+  opacity: 1;
+  visibility: visible;
+  transition:
+    height 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    opacity 0.4s ease,
+    visibility 0s linear 0s;
+}
+
+
+    .projector-screen.active {
+    visibility: visible;
+    opacity: 1;
+    height: auto !important;
+    position: static !important;
+  }
+
+
+      .screen-content {
+        flex-direction: column;
+        padding: 40px 20px;
+        height: auto;
+      }
+
+      .left-panel h1 {
+        font-size: 3rem;
+        text-align: center;
+      }
+
+      .left-panel p {
+        max-width: 100%;
+        text-align: center;
+      }
+
+      .right-panel {
+        margin-top: 40px;
+        width: 100%;
+      }
+
+      .carousel {
+        width: 100%;
+        margin: 0;
+      }
+
+      .carousel img {
+        height: 250px;
+      }
+
+      .arrow.left, .arrow.right {
+        display: none;
+      }
+
+  .close-screen {
+    top: 150px !important; /* 🡐 Adjust this number to push it down */
+    right: 20px !important;
+    }
+
+
+
+      .image-caption {
+        padding: 0;
+      }
+
+      .left-bg {
+        display: none;
+      }
+
+        .default-content {
+    display: flex !important;
+    opacity: 1 !important;
+    pointer-events: auto;
+    height: auto;
+    min-height: 100vh;
+  }
+
+      .default-content h1 {
+        font-size: 3.5rem;
+      }
+
+      .default-content .subtitle {
+        font-size: 1.4rem;
+      }
+
+      .default-content p {
+        font-size: 1.1rem;
+      }
+
+      .image-modal img {
+        max-width: 95%;
+        max-height: 70vh;
+      }
+
+      .image-modal .modal-arrow.left {
+        left: 10px;
+      }
+
+      .image-modal .modal-arrow.right {
+        right: 10px;
+      }
+
+      .image-modal .close-btn {
+        top: 20px;
+        right: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="stack">
+    <div class="tab" id="tabBIM" data-target="bim">BIM</div>
+    <div class="tab" id="tabAutoCAD" data-target="autocad">AUTOCAD</div>
+    <div class="tab" id="tabAdobe" data-target="adobe">ADOBE</div>
+
+  </div>
+
+  <!-- Projector Screen -->
+  <div class="projector-screen" id="projectorScreen">
+    <button class="close-screen" id="closeScreen">&times;</button>
+    <div class="screen-content" id="screenContent">
+      <div class="left-bg"></div>
+      <div class="left-panel">
+        <h1 id="screenTitle">Interior Design</h1>
+        <p id="screenDescription">Creating cozy and innovative interiors for modern spaces using digital construction tools.</p>
+      </div>
+      <div class="right-panel">
+        <div class="carousel" id="screenCarousel">
+          <button class="arrow left" id="screenLeft">&#8249;</button>
+          <img id="screenImage" src="" alt="Project Image">
+          <button class="arrow right" id="screenRight">&#8250;</button>
+          <div class="image-caption">
+            <h3 id="screenCaptionTitle">Modern Living Spaces</h3>
+            <p id="screenCaptionDesc">Sophisticated 3D modeling and visualization</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced default content -->
+  <div class="default-content" id="defaultContent">
+    <h1>Interior Design Studio</h1>
+    <p class="subtitle">Where creativity meets functionality</p>
+    <p>Welcome to our comprehensive design studio where we transform spaces into extraordinary experiences. Our expertise spans across cutting-edge BIM technology, precision AutoCAD drafting, and stunning Adobe visualizations.</p>
+    <div class="cta-text">Click on any tab above to explore our specialized services</div>
+  </div>
+
+  <!-- Fullscreen Image Modal -->
+  <div class="image-modal" id="imageModal">
+    <button class="close-btn" id="closeModal">&times;</button>
+    <button class="modal-arrow left" id="modalPrev">&#8249;</button>
+    <img id="modalImage" src="" alt="Expanded View">
+    <button class="modal-arrow right" id="modalNext">&#8250;</button>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const projectorScreen = document.getElementById('projectorScreen');
+    const screenContent = document.getElementById('screenContent');
+    const defaultContent = document.getElementById('defaultContent');
+    const closeScreen = document.getElementById('closeScreen');
+
+    // Tab content data
+    const tabData = {
+      bim: {
+        title: "Interior Design",
+        description: "Creating cozy and innovative interiors for modern spaces using digital construction tools.",
+        images: [
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1700&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
+        ],
+        captionTitle: "Modern Living Spaces",
+        captionDesc: "Sophisticated 3D modeling and visualization for contemporary interior design projects"
+      },
+      autocad: {
+        title: "Technical Drafting",
+        description: "High-precision CAD drawings, blueprints and layouts for architects and engineers.",
+        images: [
+          "https://images.unsplash.com/photo-1721244653652-268631ec049a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fEJsdWVwcmludHxlbnwwfHwwfHx8MA%3D%3D",
+          "https://images.unsplash.com/photo-1721244653627-90b840127a7a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fEJsdWVwcmludHxlbnwwfHwwfHx8MA%3D%3D"
+        ],
+        captionTitle: "Precision Engineering",
+        captionDesc: "Technical blueprints and detailed architectural drawings with millimeter accuracy"
+      },
+      adobe: {
+        title: "Creative Visuals",
+        description: "Crafting artistic, visually compelling work using Adobe Creative Suite tools.",
+        images: [
+          "https://plus.unsplash.com/premium_photo-1731943871604-a2a7ab41a20b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8ODV8fFJlbmRlciUyMGJ1aWxkaW5nfGVufDB8fDB8fHww",
+          "https://images.unsplash.com/photo-1675328945459-03844c67270f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDN8fFJlbmRlciUyMGJ1aWxkaW5nfGVufDB8fDB8fHww"
+        ],
+        captionTitle: "Creative Visualization",
+        captionDesc: "Stunning architectural renders and artistic presentations using Adobe Creative Suite"
+      }
+    };
+
+    let currentTabImages = [];
+    let currentImageIndex = 0;
+    let currentTab = null;
+
+    // Function to reset animations
+    function resetAnimations() {
+      screenContent.classList.add('reset-animations');
+      setTimeout(() => {
+        screenContent.classList.remove('reset-animations');
+      }, 50);
+    }
+
+    // Tab click handlers
+        tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+        const targetId = tab.getAttribute('data-target');
+
+        if (projectorScreen.classList.contains('active')) {
+        resetAnimations();
+        }
+
+        const data = tabData[targetId];
+        currentTab = targetId;
+
+        // Set projector screen top based on tab position
+        const tabRect = tab.getBoundingClientRect();
+        const scrollY = window.scrollY || window.pageYOffset;
+        projectorScreen.style.top = `${tabRect.top + scrollY + tab.offsetHeight}px`;
+
+        // Update content
+        document.getElementById('screenTitle').textContent = data.title;
+        document.getElementById('screenDescription').textContent = data.description;
+        document.getElementById('screenImage').src = data.images[0];
+        document.getElementById('screenCaptionTitle').textContent = data.captionTitle;
+        document.getElementById('screenCaptionDesc').textContent = data.captionDesc;
+
+        // Set data attributes for styling
+        screenContent.setAttribute('data-tab', targetId);
+
+        // Update carousel data
+        currentTabImages = data.images;
+        currentImageIndex = 0;
+
+        // Show projector screen
+        projectorScreen.classList.add('active');
+        defaultContent.classList.add('hidden');
+    });
+    });
+
+
+    // Close screen handler
+    closeScreen.addEventListener('click', () => {
+      projectorScreen.classList.remove('active');
+      defaultContent.classList.remove('hidden');
+      currentTab = null;
+    });
+
+    // Carousel navigation
+    document.getElementById('screenLeft').addEventListener('click', () => {
+      currentImageIndex = (currentImageIndex - 1 + currentTabImages.length) % currentTabImages.length;
+      document.getElementById('screenImage').src = currentTabImages[currentImageIndex];
+    });
+
+    document.getElementById('screenRight').addEventListener('click', () => {
+      currentImageIndex = (currentImageIndex + 1) % currentTabImages.length;
+      document.getElementById('screenImage').src = currentTabImages[currentImageIndex];
+    });
+
+    // Modal functionality
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    const modalPrev = document.getElementById('modalPrev');
+    const modalNext = document.getElementById('modalNext');
+    const closeModal = document.getElementById('closeModal');
+
+    document.getElementById('screenImage').addEventListener('click', () => {
+      modalImg.src = currentTabImages[currentImageIndex].replace(/w=\d+/, 'w=1400');
+      modal.classList.add('active');
+    });
+
+    modalPrev.addEventListener('click', () => {
+      currentImageIndex = (currentImageIndex - 1 + currentTabImages.length) % currentTabImages.length;
+      modalImg.src = currentTabImages[currentImageIndex].replace(/w=\d+/, 'w=1400');
+    });
+
+    modalNext.addEventListener('click', () => {
+      currentImageIndex = (currentImageIndex + 1) % currentTabImages.length;
+      modalImg.src = currentTabImages[currentImageIndex].replace(/w=\d+/, 'w=1400');
+    });
+
+    closeModal.addEventListener('click', () => {
+      modal.classList.remove('active');
+    });
+
+ 
+
+
+
+    // Keyboard handlers
+    document.addEventListener('keydown', (e) => {
+      if (e.key === "Escape") {
+        modal.classList.remove('active');
+        projectorScreen.classList.remove('active');
+        defaultContent.classList.remove('hidden');
+        currentTab = null;
+      }
+    });
+  </script>
+</body>
+</html>
